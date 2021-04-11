@@ -65,11 +65,11 @@
   - Profiler für C/C++/Fortran und Java von Intel
   - sehr umfangreich, hilft beim Finden von Hotspots, Bottlenecks etc.
   - Ein Deep Dive hier wäre aüßerst interessant, aber auch nur das Verwenden eines Programms
-  - funktioniert nur mit Intel-Prozessoren, AMD wird nicht unterstützt
+  - funktioniert **nur** mit Intel-Prozessoren, AMD wird nicht unterstützt
   - sollte auf einem seperaten Rechner, als dem der gemessen wird, ausgeführt werden.
 - AMD uProf
   - https://developer.amd.com/amd-uprof/
-  - AMD Equivalent zu VTune, sehr primitiv
+  - AMD Äquivalent zu VTune, sehr primitiv
   - würde ich nicht empfehlen
 - VisualVM
   - Profiler für Java, zeigt kumulierte verbrauchte CPU-Zeit pro Funktion an
@@ -129,10 +129,12 @@
 
 - Hyperthreading
 - Frequenzanpassung der CPU
+- x86, die Vielzahl von zusätzlichen Befehlssatzerweiterungen und das Verhalten der Caches untereinander sind so komplex, dass man darüber eine eigene Arbeit schreiben könnte. Insbesondere kann man keine standfesten theoretischen Aussagen treffen (da Closed Source).
 - Sind Größen korreliert?
   - e.g. Laufzeit/CPU-Zeit und Energieverbrauch
 - Sehr kurze Methoden kann man schlecht berücksichtigen, wenn diese kürzer als ein Testintervall ist.
 - Tendenziell sind einige wenige Funktionen für den Großteil der verbrauchten CPU-Zeit verantwortlich.
+- Die Rechnungs- und Speicherkomplexität von Funktionen spielt beim Energieverbrauch auch eine Rolle. Man kann dieses Problem umgehen, wenn weit verbreitete Benchmarks verwendet werden, dadurch wird halt immer der selbe Code ausgeführt.
 
 ## Derzeitiger Plan
 
@@ -152,6 +154,9 @@
   - müsste angepasst werden
   - Anpassung schon "toter" Software ist aus meiner Sicht wenig zielführend
 - C-basierter Ansatz muss so anders angegangen werden
+
+- Der einfachste und primitivste Ansatz wäre typische C-Routinen wie Sortieralgorithmen etc. zu vergleichen indem man diese lange laufen lässt und den Energieverbrauch, Laufzeit und verbrauchte CPU-Zeit derweil misst. Der Visualisierungsteil gestaltet sich dabei noch schwierig. 
+- VTune und Valgrind haben hier auch Mittel zum Messen und Visualisieren von Performance, aber die Lösung für Energieverbrauch gibt es halt nicht.
 
 ## Java basiert
 
