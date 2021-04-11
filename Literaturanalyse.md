@@ -23,9 +23,10 @@
   - Blendet andere Komponenten aus, aber solange die Applikation nicht grafisch (Display und GPU) ist, ist es trotzdem repräsentativ
   - Speichernutzung kann anhand des Energieverbrauchs des DRAM-Speichercontrollers ermittelt werden
   - Messungen werden rund aller 10-100ms aktualisiert
+  - Die Energieangabe gilt für den GESAMTEN Prozessor, andere Programme bzw. Grundlast müssen berücksichtigt werden!
 - Energiemodelle für Java-Bytecode existieren
   - wurden aber nie mit Hardware validiert
-  - Methodengranularität scheint das häufiste und machbarste zu sein
+  - Methodengranularität scheint möglich zu sein
   - Für Mobile Geräte
   - oft nicht fortgeführt und kein Quellcode vorhanden
 - Energiemodelle für C
@@ -50,31 +51,64 @@
   - https://01.org/blogs/2014/running-average-power-limit-%E2%80%93-rapl
   - Bibliothek um eine Prozessor-API auszulesen
   - Stromverbrauch eines Prozessors wird in einem Zeitraum in Jouls gemessen
-- https://github.com/hubblo-org/scaphandre
+- Scaphandre
+  - https://github.com/hubblo-org/scaphandre
+  - in Rust geschrieben
   - Stromverbrauch eines isolierten Prozesses mit RAPL messbar
+  - sollte auch auf AMD und zukünftig ARM funktionieren
+  - Schnittstellen sind noch sehr primitiv bzw. nicht vorhanden
+  - JSON output, ist aber grausam aufgebaut
+  - Exporter für Monitoring-Software wie Prometheus vorhanden
+  - Ist ein Open-Source Projekt, welches auch relativ beliebt ist
 - VTune Profiler
   - https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/vtune-profiler.html
   - Profiler für C/C++/Fortran und Java von Intel
+  - sehr umfangreich, hilft beim Finden von Hotspots, Bottlenecks etc.
+  - Ein Deep Dive hier wäre aüßerst interessant, aber auch nur das Verwenden eines Programms
+  - funktioniert nur mit Intel-Prozessoren, AMD wird nicht unterstützt
+  - sollte auf einem seperaten Rechner, als dem der gemessen wird, ausgeführt werden.
+- AMD uProf
+  - https://developer.amd.com/amd-uprof/
+  - AMD Equivalent zu VTune, sehr primitiv
+  - würde ich nicht empfehlen
 - VisualVM
   - Profiler für Java, zeigt kumulierte verbrauchte CPU-Zeit pro Funktion an
-  - Gut um einen Überblick zu bekommen
-- https://kieker-monitoring.net/
+  - Gut um einen Überblick zu bekommen und mit Kieker genauer nachzuhacken
+  - Open Source Alternative zum JProfiler
+- Kieker
+  - https://kieker-monitoring.net/
   - Für Feinmessungen, gut einstellbar, Integration mit dem Dashboard bereits vorhanden
+  - Bereits Erfahrung vorhanden durch Kieker-Integration ins jQAssistant 
 - https://gitlab.com/MarcoCouto/c-lem https://gitlab.com/MarcoCouto/serapis
   - Um Energiekosten von C-Instruktionen zu ermitteln
   - Wurde nach Veröffentlichung des dazugehörigen Papers nicht fortgeführt
-- https://github.com/rouvoy/powerapi
+  - Keine Dokumentation, von daher schwierig durchzuführen
+  - Funktioniert nicht auf meiner Hardware, so wie es aussieht wurde der Code auf den PC des ursprünglichen Entwicklers ausgelegt
+  - War das vielversprechensde von allem, man kann ggf. das Prinzip neu implementieren
+- powerapi
+  - https://github.com/rouvoy/powerapi
   - Energieverbrauch auf Prozess-Level
   - kein Update seit 5 Jahren
+  - stattdessen Powertop verwenden
 - Powertop
   - https://01.org/powertop/
+  - Nutzt Energieverbrauch der Batterie
+  - funktioniert, trennt Prozesse voneinander
+  - Perfekt geeignet zur Validierung
 - Linux Bordmittel
   - power_now
   - powercap
-  - Valgrind
-  - gperftools
+- Valgrind
+  - Binary (C/C++/Fortran) Profiler
+  - Methodengranular
+  - Real und CPU-Zeit
+  - Eigene Visualisierung
+  - Höherer Overhead -> Längere Laufzeit des Programms
+- gperftools
+  
 - Prime95
   - Zum Auslasten aller CPU-Kerne, damit man den maximalen Stromverbrauch des Prozessors ermitteln kann
+  - Funktioniert derzeit nur bedingt gut, da nicht alle Teile des Prozessors ausgelastet werden
 
 - Die Evaluierung der gezeigten Ansätze mache ich über das nächste Wochenende.
 
@@ -97,6 +131,8 @@
 - Frequenzanpassung der CPU
 - Sind Größen korreliert?
   - e.g. Laufzeit/CPU-Zeit und Energieverbrauch
+- Sehr kurze Methoden kann man schlecht berücksichtigen, wenn diese kürzer als ein Testintervall ist.
+- Tendenziell sind einige wenige Funktionen für den Großteil der verbrauchten CPU-Zeit verantwortlich.
 
 ## Derzeitiger Plan
 
@@ -106,13 +142,42 @@
   - Nutzt verschiedene C-SPLs und Community Benchmarks
   - Rechnet anhand eines Modells und RAPL die Energiekosten aus, diese werden mit `Scaphandre` validiert
 - Energiekosten werden nochmal zusätzlich anhand einer Messung des Batteriestandes meines Laptops validiert
-- C-Funktion und Instruktionskosten einer SPL mit Metapher visualisieren
+- C-Funktion und Instruktionskosten einer SPL durch C-LEM messen und mit Metapher visualisieren
+- getaviz hat keine C-Unterstützung
+- jqassistant hat nur in alten Versionen C-Unterstützungen
 
+- https://gitlab.com/MarcoCouto/c-lem 
+  - Am vielversprechendsten auf den ersten Blick
+  - funktioniert nicht mit meinem Prozessortyp
+  - müsste angepasst werden
+  - Anpassung schon "toter" Software ist aus meiner Sicht wenig zielführend
+- C-basierter Ansatz muss so anders angegangen werden
+
+## Java basiert
+
+- Eine der Applikationen die Prof. Siegmund in seinen Papern häufig verwendet nehmen.
+- Mit VisualVM profilen um sich einen Überblick zu verschaffen
+- Kieker misst standardmäßig vergangene Realzeit, nicht die vergangene CPU-Zeit
+  - Muss ggf. angepasst werden
+- Verbraucht Energie derweil mit Scaphandre messen
+- Wenn Realzeit bzw. CPU-Zeit mit Energieverbrauch korrelliert sind kann man es darüber versuchen 
+
+### Visualisierung
+
+- Da wir hier nur auf einer Ebene messen, wird die hierarchische Visualisierung schwierig.
 
 ## Wichtigste Literatur
 
+- [Methodological Guidelines for Measuring Energy Consumption of Software Applications](http://dx.doi.org/10.1155/2019/5284645)
+  - Grundlagen der Methoden zum Messen
+  - Werde ich zur Einordnung der verwendeten Methoden nehmen
 - [Survey of Approaches for Assessing Software Energy Consumption](https://dl.acm.org/doi/pdf/10.1145/3141842.3141846)
-  - Einordnung der verschiedenen Möglichkeiten zum Messen des Energieverbrauchs
+  - Existierende praktische Methoden
+- [Characterizing the energy consumption of data transfers and arithmetic operations on x86-64 processors](http://dx.doi.org/10.1109/GREENCOMP.2010.5598316)
+  - Erklärt wie Störfaktoren (dynamische Frequenz etc.) deaktiviert werden können
+- [How to measure energy-efficiency of software: Metrics and measurement results](http://dx.doi.org/10.1109/GREENS.2012.6224256)
+  - Ansatz zum Messen in Joule
+  - Kombiniert Black- und WHite-Box-Modelle
 - [Automating Energy Optimization with Features](https://www.infosun.fim.uni-passau.de/cl/publications/docs/FOSD2010EnergyOpt.pdf)
   - Frühes Paper vom Prof. Siegmund zum Thema
   - Etabliert grundlegende Zusammenhänge
@@ -140,3 +205,11 @@
 - [GreenOracle: Estimating Software Energy Consumption with Energy Measurement Corpora](https://dl.acm.org/doi/pdf/10.1145/2901739.2901763)
   - Für Smartphones
   - Basiert auf CPU-Auslastung und Anzahl von System-Calls
+- [A Model-based Framework for the Analysis of Software Energy Consumption](http://dx.doi.org/10.1145/3350768.3353813)
+  - Erweitert existierende Hidden-Markow-Modelle um Energiekosten
+  - nutzt jRAPL + LTS-Analyse Tool LoTuS (nicht mehr verfügbar)
+  - Graphenbasiert
+  - Sagt aus, dass Java viel Execution overhead (JVM) hat, und dadurch die Energiemessungen nicht wirklich korrekt zugeschrieben werden können
+  - Lässt Grundlast außen vor
+  - Long und Double verbrauchen mehr Energie
+  - kein angehängter Code
