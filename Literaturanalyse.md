@@ -158,7 +158,7 @@
 - C-basierter Ansatz muss so anders angegangen werden
 
 - Der einfachste und primitivste Ansatz wäre typische C-Routinen wie Sortieralgorithmen etc. zu vergleichen indem man diese lange laufen lässt und den Energieverbrauch, Laufzeit und verbrauchte CPU-Zeit derweil misst. Der Visualisierungsteil gestaltet sich dabei noch schwierig. 
-- VTune und Valgrind haben hier auch Mittel zum Messen und Visualisieren von Performance, aber die Lösung für Energieverbrauch oro Methode gibt es halt nicht. Wenn wir anstatt dessen CPU-Zeit nehmen würden, wäre es machbar, aber wir hätten keine Joule-Angaben. Diese möchte ich aber in der Arbeit haben, zumindest an einem Beispiel.
+- VTune (und teilweise Valgrind) haben hier auch Mittel zum Messen und Visualisieren von Performance, aber die Lösung für Energieverbrauch pro Methode gibt es halt nicht. Wenn wir anstatt dessen CPU-Zeit nehmen würden, wäre es machbar, aber wir hätten keine Joule-Angaben. Diese möchte ich aber in der Arbeit haben, zumindest an einem Beispiel.
 
 ## Java basiert
 
