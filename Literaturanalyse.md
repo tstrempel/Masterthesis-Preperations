@@ -64,6 +64,8 @@
   - https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/vtune-profiler.html
   - Profiler für C/C++/Fortran und Java von Intel
   - sehr umfangreich, hilft beim Finden von Hotspots, Bottlenecks etc.
+  - Kann systemweiten Stromverbrauch auslesen.
+  - **CPU-Zeit pro Instruktion auslesbar** <- Das ist eigentlich ideal
   - Ein Deep Dive hier wäre aüßerst interessant, aber auch nur das Verwenden eines Programms
   - funktioniert **nur** mit Intel-Prozessoren, AMD wird nicht unterstützt
   - sollte auf einem seperaten Rechner, als dem der gemessen wird, ausgeführt werden.
@@ -156,7 +158,7 @@
 - C-basierter Ansatz muss so anders angegangen werden
 
 - Der einfachste und primitivste Ansatz wäre typische C-Routinen wie Sortieralgorithmen etc. zu vergleichen indem man diese lange laufen lässt und den Energieverbrauch, Laufzeit und verbrauchte CPU-Zeit derweil misst. Der Visualisierungsteil gestaltet sich dabei noch schwierig. 
-- VTune und Valgrind haben hier auch Mittel zum Messen und Visualisieren von Performance, aber die Lösung für Energieverbrauch gibt es halt nicht.
+- VTune und Valgrind haben hier auch Mittel zum Messen und Visualisieren von Performance, aber die Lösung für Energieverbrauch oro Methode gibt es halt nicht. Wenn wir anstatt dessen CPU-Zeit nehmen würden, wäre es machbar, aber wir hätten keine Joule-Angaben. Diese möchte ich aber in der Arbeit haben, zumindest an einem Beispiel.
 
 ## Java basiert
 
